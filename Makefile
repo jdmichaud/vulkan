@@ -1,29 +1,13 @@
-CFLAGS = -std=c++17 \
-		-I.env/glfw-3.3/include/ \
-		-I.env/vulkansdk-macos-1.1.114.0/macOS/include/ \
-		-I.env/glm-0.9.9.5/ \
-		-L.env/glfw-3.3/build/src/ \
-		-L.env/vulkansdk-macos-1.1.114.0/MoltenVK/macOS/static
-LDFLAGS = -lglfw3 \
-		-lMoltenVK \
-		-framework Cocoa \
-		-framework OpenGL \
-		-framework IOKit \
-		-framework CoreVideo \
-		-framework IOSurface \
-		-framework Metal \
-		-framework Foundation \
-		-framework QuartzCore
-
-all: VulkanTest
+CFLAGS = -std=c++17 -I${VULKAN_SDK_PATH}/include `pkg-config --cflags glfw3`
+LDFLAGS = -L$(VULKAN_SDK_PATH)/lib `pkg-config --static --libs glfw3` -lvulkan
 
 VulkanTest: main.cpp
-	c++ $(CFLAGS)	-o VulkanTest	main.cpp $(LDFLAGS)
+	g++ $(CFLAGS) -o VulkanTest main.cpp $(LDFLAGS)
 
+.PHONY: test clean
 
-.PHONY: clean re
+test: VulkanTest
+	LD_LIBRARY_PATH=$(VULKAN_SDK_PATH)/lib VK_LAYER_PATH=$(VULKAN_SDK_PATH)/etc/vulkan/explicit_layer.d ./VulkanTest
 
 clean:
-	rm -fr VulkanTest
-
-re: clean all
+	rm -f VulkanTest
