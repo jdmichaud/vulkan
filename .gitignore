@@ -2,3 +2,4 @@
 .env
 VulkanTest
 .DS_Store
+vulkan-test

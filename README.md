@@ -31,7 +31,14 @@ various environment variable you need to compile a program with Vulkan.
 source setup_dev_env_linux.sh
 ```
 
-You can then compile.
+You can then compile with:
+```
+make
+```
+Then:
+```
+./vulkan-test
+```
 
 ## MacOS
 
