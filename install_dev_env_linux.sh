@@ -120,7 +120,19 @@ installCPackage https://www.x.org/releases/individual/lib/libXdamage-1.1.tar.gz 
 installCPackage https://www.x.org/archive/individual/proto/xf86vidmodeproto-2.3.tar.gz xf86vidmodeproto-2.3
 installCPackage https://www.x.org/releases/individual/lib/libXxf86vm-1.1.4.tar.gz libXxf86vm-1.1.4
 installCPackage https://www.x.org/releases/individual/lib/libxshmfence-1.3.tar.gz libxshmfence-1.3
-installCPackage http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz m4-1.4.18
+
+#installCPackage http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz m4-1.4.18
+# Since glibc 2.28, m4 does not compile. As it is not maintained anymore, use a
+# patch from buildroot.
+downloadFile http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz
+untarFile .download/m4-1.4.18.tar.gz
+(
+  cd .env/m4-1.4.18
+  curl -sOL https://raw.githubusercontent.com/buildroot/buildroot/master/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
+  patch -p1 < 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
+  compilePackage m4-1.4.18 `nproc`
+)
+
 installCPackage https://sourceware.org/elfutils/ftp/0.177/elfutils-0.177.tar.bz2 elfutils-0.177
 
 downloadFile https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3.tar.gz
