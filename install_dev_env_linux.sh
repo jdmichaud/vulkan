@@ -130,8 +130,8 @@ untarFile .download/m4-1.4.18.tar.gz
   cd .env/m4-1.4.18
   curl -sOL https://raw.githubusercontent.com/buildroot/buildroot/master/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
   patch -p1 < 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
-  compilePackage m4-1.4.18 `nproc`
 )
+compilePackage m4-1.4.18 `nproc`
 
 installCPackage https://sourceware.org/elfutils/ftp/0.177/elfutils-0.177.tar.bz2 elfutils-0.177
 
