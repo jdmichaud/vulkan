@@ -33,6 +33,15 @@ function untarFile() {
   file=$1
 
   mkdir -p .env
+  # Test if folder exists and assume it it already untared if present
+  target_dir=`tar -t -f $file | head -1 | cut -f1 -d"/"`
+  destination=.env/$target_dir
+  echo 'destination' $destination
+  if test -d $destination; then
+    echo "$destination already untared"
+    return
+  fi
+
   echo "untaring $file"
   tar -x -f $file -C .env
   if [ $? -ne 0 ]; then
@@ -58,11 +67,20 @@ function compilePackage() {
   nbjobs=$2 || `nproc`
 
   prefix=`pwd`/.env
+  if test -f $prefix/.$package.installed; then
+    echo "$package already installed"
+    return
+  fi
+
   pushd .
   cd .env/$package
-  ./configure --prefix=$prefix --with-python=$prefix --enable-autotools --enable-llvm
+  # --with-zlib for libelf
+  ./configure --prefix=$prefix --with-python=$prefix --enable-autotools --enable-llvm --with-zlib
   make -j $nbjobs
   make install
+  if [ $? -eq 0 ]; then
+    touch $prefix/.$package.installed
+  fi
   popd
 }
 
@@ -82,7 +100,18 @@ function installCPackage() {
 PREFIX=`pwd`/.env/
 export PATH=$PATH:${PREFIX}bin
 export CPPFLAGS="-I${PREFIX}include"
+export LDFLAGS="-L${PREFIX}lib"
 export PKG_CONFIG_PATH=${PREFIX}lib/pkgconfig
+
+downloadFile https://www.zlib.net/zlib-1.2.11.tar.gz
+untarFile .download/zlib-1.2.11.tar.gz
+(
+  prefix=`pwd`/.env
+  cd .env/zlib-1.2.11
+  ./configure --prefix=$prefix
+  make -j `nproc`
+  make install
+)
 
 # All these are dependencies for vulkansdk and glfw
 installCPackage https://www.x.org/archive/individual/proto/xproto-7.0.31.tar.gz xproto-7.0.31
@@ -124,14 +153,16 @@ installCPackage https://www.x.org/releases/individual/lib/libxshmfence-1.3.tar.g
 #installCPackage http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz m4-1.4.18
 # Since glibc 2.28, m4 does not compile. As it is not maintained anymore, use a
 # patch from buildroot.
-downloadFile http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz
-untarFile .download/m4-1.4.18.tar.gz
-(
-  cd .env/m4-1.4.18
-  curl -sOL https://raw.githubusercontent.com/buildroot/buildroot/master/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
-  patch -p1 < 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
-)
-compilePackage m4-1.4.18 `nproc`
+if ! test -f .env/.m4-1.4.18.tar.gz.installed; then
+  downloadFile http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.gz
+  untarFile .download/m4-1.4.18.tar.gz
+  (
+    cd .env/m4-1.4.18
+    curl -sOL https://raw.githubusercontent.com/buildroot/buildroot/master/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
+    patch -p1 < 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
+  )
+  compilePackage m4-1.4.18 `nproc`
+fi
 
 installCPackage https://sourceware.org/elfutils/ftp/0.177/elfutils-0.177.tar.bz2 elfutils-0.177
 
@@ -159,6 +190,10 @@ untarFile .download/llvm-9.0.0.src.tar.xz
 installCPackage https://ftp.gnu.org/gnu/bison/bison-3.4.tar.xz bison-3.4 1
 installCPackage https://github.com/westes/flex/releases/download/v2.6.3/flex-2.6.3.tar.gz flex-2.6.3 1
 
+# Mesa is built by meson and meson need some specific python modules
+python3 -mvenv venv
+source venv/bin/activate
+pip install mako xgettext
 # Install mesa homemade build system meson
 downloadFile https://github.com/mesonbuild/meson/releases/download/0.51.2/meson-0.51.2.tar.gz
 untarFile .download/meson-0.51.2.tar.gz

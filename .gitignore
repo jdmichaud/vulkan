@@ -4,3 +4,4 @@ VulkanTest
 .DS_Store
 vulkan-test
 setup_dev_env_linux.sh
+venv
