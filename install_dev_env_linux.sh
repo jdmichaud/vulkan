@@ -103,6 +103,7 @@ export CPPFLAGS="-I${PREFIX}include"
 export LDFLAGS="-L${PREFIX}lib"
 export PKG_CONFIG_PATH=${PREFIX}lib/pkgconfig
 
+# Can't use compilePackage because zlib configure script does not take unknown options
 downloadFile https://www.zlib.net/zlib-1.2.11.tar.gz
 untarFile .download/zlib-1.2.11.tar.gz
 (
@@ -193,7 +194,7 @@ installCPackage https://github.com/westes/flex/releases/download/v2.6.3/flex-2.6
 # Mesa is built by meson and meson need some specific python modules
 python3 -mvenv venv
 source venv/bin/activate
-pip install mako xgettext
+pip install mako
 # Install mesa homemade build system meson
 downloadFile https://github.com/mesonbuild/meson/releases/download/0.51.2/meson-0.51.2.tar.gz
 untarFile .download/meson-0.51.2.tar.gz
@@ -208,6 +209,7 @@ untarFile .download/v1.9.0.tar.gz
   cp ninja ../bin/
 )
 
+installCPackage https://ftp.gnu.org/pub/gnu/gettext/gettext-0.20.1.tar.gz gettext-0.20.1
 downloadFile https://mesa.freedesktop.org/archive/mesa-19.1.7.tar.xz mesa-19.1.7
 untarFile .download/mesa-19.1.7.tar.xz
 (
