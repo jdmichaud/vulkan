@@ -251,7 +251,7 @@ export VULKAN_SDK_PATH=`pwd`/.env/${VULKAN_VERSION}/x86_64/
 # So that vulkan will find icd.d
 export XDG_DATA_DIRS=\$XDG_DATA_DIRS:`pwd`/.env/share/:${VULKAN_SDK_PATH}/etc/vulkan/
 
-export PKG_CONFIG_PATH=`pwd`/.env/lib/pkgconfig:${VULKAN_SDK_PATH}/lib/pkgconfig/
+export PKG_CONFIG_PATH=`pwd`/.env/lib/pkgconfig:`pwd`/.env/lib/x86_64-linux-gnu/pkgconfig:${VULKAN_SDK_PATH}/lib/pkgconfig/
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:`pwd`/.env/lib/:${VULKAN_SDK_PATH}/lib
 export PATH=\$PATH:`pwd`/.env/bin:${VULKAN_SDK_PATH}/bin
 EOF
